@@ -686,25 +686,11 @@ unsigned int read_position(void) {
 	sensors_sum = 0;
 	on_line = 0;
 
-	//-------------- Read  Odd sensors ------------
 	ROM_GPIOPinWrite(PING_PORT, PING1, PING1);  //LEDS ON
 	delay(4);
 
 	for (sens = 0; sens < SENSORS_NR / 2; sens++) {
 		tmp_value = analogRead(sensors[sens]);
-
-		//--------- Validate ----------
-		if (tmp_value < sensor_calmin[sens])
-			tmp_value = sensor_calmin[sens];
-		if (tmp_value > sensor_calmax[sens])
-			tmp_value = sensor_calmax[sens];
-
-		sensor_values[sens] = ((tmp_value - sensor_calmin[sens]) * 10) / sensor_denom[sens];
-
-		//----------- Noise filtering ----------
-		if (sensor_values[sens] < SENSOR_TRESHOLD) {
-			sensor_values[sens] = 0;
-		}
 
 		sensors_sum += sensor_values[sens];
 		pos += sensor_values[sens] * ((sens + 1) * 100);
@@ -715,12 +701,7 @@ unsigned int read_position(void) {
 			line_map += sens_bitmap[sens];
 		}
 	}
-	ROM_GPIOPinWrite(PING_PORT, PING1, 0);  //LEDS OFF
-	delay(4);
-
-	//-------------- Read Even sensors ------------
-	ROM_GPIOPinWrite(PING_PORT, PING1, PING1);  //LEDS ON
-	delay(4);
+	
 	for (sens = SENSORS_NR - 1; sens >= SENSORS_NR / 2; sens--) {
 		tmp_value = analogRead(sensors[sens]);
 
